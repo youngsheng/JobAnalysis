@@ -28,11 +28,11 @@ class ZhipinSpider(scrapy.Spider):
     # positionUrl = 'https://www.zhipin.com/c101050100/?query=python'
     positionUrl = 'https://www.zhipin.com/'
     # 当前省份的下标
-    currentProv = 0
+    currentProv = 25
     # 当前页码
-    currentPage = 1
+    currentPage = 5
     # 当前城市的下标
-    currentCity = 0
+    currentCity = 5 #101270600
 
     cityListUrl = "https://www.zhipin.com/common/data/city.json"
 
@@ -129,7 +129,7 @@ class ZhipinSpider(scrapy.Spider):
     def start_requests(self):
         # start_requests 只调用一次,初始化时获取city列表
         res = requests.get(self.cityListUrl, headers=self.headers).content
-        city = json.loads(res)
+        city = json.loads(res.decode('utf-8'))
 
         # 调试用
         self.cityList = city['data']['cityList']
@@ -158,5 +158,5 @@ class ZhipinSpider(scrapy.Spider):
             smtppass = "young163COM",  # 发送邮箱的密码不是你注册时的密码，而是授权码！！！切记！
             smtpport = 25   # 端口号
         )
-        mailer.send(to="973806951@qq.com", subject = subject.encode("utf-8"), body = body.encode("utf-8"))
+        mailer.send(to="973806951@qq.com", subject = subject, body = body)
 

@@ -22,7 +22,7 @@ MONGODB_DBNAME = 'Jobs'          #数据库名
 MONGODB_DOCNAME = 'Zhipin'         #表名
 
 LOG_FILE = './log.log'
-LOG_LEVEL = 'INFO'
+LOG_LEVEL = 'ERROR'
 
 BOT_NAME = 'www_zhipin_com'
 
