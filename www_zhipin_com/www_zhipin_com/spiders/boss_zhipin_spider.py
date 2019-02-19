@@ -153,9 +153,9 @@ class ZhipinSpider(scrapy.Spider):
     def send_email(self, subject, body):
         mailer = MailSender(
             smtphost = "smtp.163.com",  # 发送邮件的服务器
-            mailfrom = "18723431793@163.com",   # 邮件发送者
-            smtpuser = "18723431793@163.com",   # 用户名
-            smtppass = "young163COM",  # 发送邮箱的密码不是你注册时的密码，而是授权码！！！切记！
+            mailfrom = "1xxxxxxxxx3@163.com",   # 邮件发送者
+            smtpuser = "1xxxxxxxxx3@163.com",   # 用户名
+            smtppass = "yxxxxxxxxxxM",  # 发送邮箱的密码不是你注册时的密码，而是授权码！！！切记！
             smtpport = 25   # 端口号
         )
         mailer.send(to="973806951@qq.com", subject = subject, body = body)
