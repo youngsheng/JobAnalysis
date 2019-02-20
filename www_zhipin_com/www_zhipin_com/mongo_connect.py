@@ -4,6 +4,7 @@ import time
 from pymongo import MongoClient
 import datetime
 from bson import binary
+import random
 
 headers = {
     'x-devtools-emulate-network-conditions-client-id': "5f2fc4da-c727-43c0-aad4-37fce8e3ff39",
@@ -18,11 +19,11 @@ headers = {
     'postman-token': "76554687-c4df-0c17-7cc0-5bf3845c9831"
 }
 conn = MongoClient('127.0.0.1', 27017)
-db = conn.jobs  # 连接mydb数据库，没有则自动创建
+db = conn.Jobs  # 连接mydb数据库，没有则自动创建
 
 
 def init():
-    items = db.jobs_python.find().sort('pid')
+    items = db.Zhipin.find().sort('pid')
     for item in items:
         if 'detail' in item.keys():  # 在爬虫挂掉再此爬取时，跳过已爬取的行
             continue
@@ -60,16 +61,16 @@ def init():
         # item['logo'] = binary.Binary(data)
         res = update(item)  # 保存数据
         print(res)
-        time.sleep(5)  # 停停停
+        time.sleep(random.randint(50,90))  # 停停停
 
 
 # 保存数据到 MongoDB 中
 def update(item):
-    return db.jobs_python.update_one({"_id": item['_id']}, {"$set": item})
+    return db.Zhipin.update_one({"_id": item['_id']}, {"$set": item})
 
 
 def clear_time():
-    items = db.jobs_python.find({})
+    items = db.Zhipin.find({})
     for item in items:
         # print(item['time'])
         if not item['time'].find('布于'):
@@ -87,7 +88,7 @@ def clear_time():
 
 
 def clear_salary():
-    items = db.jobs_python.find({})
+    items = db.Zhipin.find({})
     for item in items:
         if type(item['salary']) == type({}):
             continue
@@ -111,7 +112,7 @@ def clear_salary():
 
 
 def update_work_year():
-    items = db.jobs_python.find({})
+    items = db.Zhipin.find({})
     for item in items:
         if item['workYear'] == '应届毕业生':
             item['workYear'] = '应届生'
@@ -125,7 +126,7 @@ def update_work_year():
 
 # 设置招聘的水平，分两次执行
 def set_level():
-    items = db.jobs_python.find({})
+    items = db.Zhipin.find({})
     for item in items:
         if item['workYear'] == '应届生':
             item['level'] = 1

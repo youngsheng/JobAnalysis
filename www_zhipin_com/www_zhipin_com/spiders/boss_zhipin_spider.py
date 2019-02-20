@@ -60,7 +60,7 @@ class ZhipinSpider(scrapy.Spider):
             # 等待用户输入验证码
             #input('please input verify code to continue:')
             self.send_email('302错误', 'please input verify code to continue!')
-            self.crawler.engine.close_spider(self, 'done!' % response.text)
+            self.crawler.engine.close_spider(self, 'done!')
         logging.debug("request->" + response.url)
         is_one_page = response.css('div.job-list>div.page').extract()
         is_end = response.css(
@@ -120,7 +120,7 @@ class ZhipinSpider(scrapy.Spider):
 
         if self.currentProv == 34:
             self.send_email('爬取成功', 'success,正常退出!')
-            self.crawler.engine.close_spider(self, 'done!' % response.text)
+            self.crawler.engine.close_spider(self, 'done!')
         # 翻页
         self.currentPage += 1
         time.sleep(random.randint(30,60))
