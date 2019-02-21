@@ -12,9 +12,12 @@
 # 中文编码
 FEED_EXPORT_ENCODING = 'utf-8'
 # 这么慢还是被限制...
-CONCURRENT_REQUESTS = 1
-DOWNLOAD_DELAY = 5
+#CONCURRENT_REQUESTS = 1
+#DOWNLOAD_DELAY = 5
 
+AUTOTHROTTLE_ENABLED = True
+AUTOTHROTTLE_START_DELAY = 0.2  # 初始下载延迟
+DOWNLOAD_DELAY = 0.2  # 每次请求间隔时间
 
 MONGODB_HOST = '127.0.0.1'   
 MONGODB_PORT = 27017
@@ -72,6 +75,10 @@ ROBOTSTXT_OBEY = True
 #     # 'scrapy.contrib.downloadermiddleware.httpproxy.HttpProxyMiddleware': 400,
 #     # 'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware': None
 # }
+DOWNLOADER_MIDDLEWARES = {
+   #'Securities.middlewares.SecuritiesDownloaderMiddleware': None,
+    'www_zhipin_com.middlewares.ABProxyMiddleware': 1,
+}
 
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html

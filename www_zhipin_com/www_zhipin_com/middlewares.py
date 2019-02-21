@@ -7,6 +7,14 @@
 
 from scrapy import signals
 
+import base64
+
+""" 阿布云ip代理key配置 """
+proxyServer = "http://http-dyn.abuyun.com:9020"
+proxyUser = "HWFHQ5YP14Lxxx"
+proxyPass = "CB8D0AD56EAxxx"
+# for Python3
+proxyAuth = "Basic " + base64.urlsafe_b64encode(bytes((proxyUser + ":" + proxyPass), "ascii")).decode("utf8")
 
 class WwwZhipinComSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
@@ -101,3 +109,9 @@ class WwwZhipinComDownloaderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+class ABProxyMiddleware(object):
+    """ 阿布云动态ip代理中间件 """
+    def process_request(self, request, spider):
+        request.meta["proxy"] = proxyServer
+        request.headers["Proxy-Authorization"] = proxyAuth
