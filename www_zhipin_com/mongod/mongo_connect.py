@@ -25,8 +25,8 @@ proxyHost = "http-dyn.abuyun.com"
 proxyPort = "9020"
 
 # 代理隧道验证信息
-proxyUser =8769OA3P
-proxyPass = "B097
+proxyUser = "8769OA3P"
+proxyPass = "B097"
 
 proxyMeta = "http://%(user)s:%(pass)s@%(host)s:%(port)s" % {
     "host" : proxyHost,
