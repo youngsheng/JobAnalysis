@@ -4,6 +4,7 @@ import time
 #import winsound
 
 import requests
+import urllib
 import scrapy
 
 import logging
@@ -25,6 +26,7 @@ class ZhipinSpider(scrapy.Spider):
         "http://www.zhipin.com/",
     ]
 
+    JobKeyword = 'python'
     # positionUrl = 'https://www.zhipin.com/c101050100/?query=python'
     positionUrl = 'https://www.zhipin.com/'
     # 当前省份的下标
@@ -59,7 +61,8 @@ class ZhipinSpider(scrapy.Spider):
             #winsound.MessageBeep()
             # 等待用户输入验证码
             #input('please input verify code to continue:')
-            self.send_email('302错误', 'please input verify code to continue!')
+            #self.send_email('302错误', 'please input verify code to continue!')
+            print('302错误', 'please input verify code to continue!')
             self.crawler.engine.close_spider(self, 'done!')
         logging.debug("request->" + response.url)
         is_one_page = response.css('div.job-list>div.page').extract()
@@ -119,11 +122,12 @@ class ZhipinSpider(scrapy.Spider):
                 self.currentPage = 0
 
         if self.currentProv == 34:
-            self.send_email('爬取成功', 'success,正常退出!')
+            #self.send_email('爬取成功', 'success,正常退出!')
+            print('爬取成功', 'success,正常退出!')
             self.crawler.engine.close_spider(self, 'done!')
         # 翻页
         self.currentPage += 1
-        time.sleep(random.randint(30,60))
+        time.sleep(random.randint(60,90))
         yield self.next_request(self.currentProv, self.currentCity)
 
     def start_requests(self):
@@ -145,8 +149,8 @@ class ZhipinSpider(scrapy.Spider):
         logging.debug(cur_city_id)
         # 这里url写想要查找什么职业
         return scrapy.http.FormRequest(
-            self.positionUrl + cur_city_id + (
-                "?query="+"%E5%B5%8C%E5%85%A5%E5%BC%8F"+"&page=%d&ka=page-%d" % (self.currentPage, self.currentPage)),
+            #self.positionUrl + cur_city_id + "?query="+"%E5%B5%8C%E5%85%A5%E5%BC%8F"+("&page=%d&ka=page-%d" % (self.currentPage, self.currentPage)),
+            self.positionUrl + cur_city_id + "?query=" + urllib.parse.quote(self.JobKeyword) + ("&page=%d&ka=page-%d" % (self.currentPage, self.currentPage)),
             headers=self.headers,
             callback=self.parse)
 

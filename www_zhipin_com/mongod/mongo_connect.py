@@ -55,7 +55,7 @@ def init():
         #html = result.get(detail_url, headers=headers)
         try:
             html = requests.get(detail_url, headers=headers, proxies=proxies)
-        except requests.exceptions.ProxyError as e:
+        except Exception as e:
             if repr(e).find('402') != -1:
                 break
             else:
@@ -77,7 +77,7 @@ def init():
         elif html.status_code != 200:  # 爬的太快网站返回403，这时等待解封吧
             print('status_code is %d,please wait and slow down' %
                   html.status_code)
-            break
+            #break
 
         soup = BeautifulSoup(html.text, "html.parser")
         job = soup.select(".job-sec .text")
