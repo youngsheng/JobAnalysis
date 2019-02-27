@@ -75,10 +75,10 @@ ROBOTSTXT_OBEY = True
 #     # 'scrapy.contrib.downloadermiddleware.httpproxy.HttpProxyMiddleware': 400,
 #     # 'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware': None
 # }
-DOWNLOADER_MIDDLEWARES = {
+#DOWNLOADER_MIDDLEWARES = {
    #'Securities.middlewares.SecuritiesDownloaderMiddleware': None,
-    'www_zhipin_com.middlewares.ABProxyMiddleware': 1,
-}
+#    'www_zhipin_com.middlewares.ABProxyMiddleware': 1,
+#}
 
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html

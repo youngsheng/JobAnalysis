@@ -150,7 +150,7 @@ class ZhipinSpider(scrapy.Spider):
         # 这里url写想要查找什么职业
         return scrapy.http.FormRequest(
             #self.positionUrl + cur_city_id + "?query="+"%E5%B5%8C%E5%85%A5%E5%BC%8F"+("&page=%d&ka=page-%d" % (self.currentPage, self.currentPage)),
-            self.positionUrl + cur_city_id + "?query=" + urllib.parse.quote(self.JobKeyword) + ("&page=%d&ka=page-%d" % (self.currentPage, self.currentPage)),
+            self.positionUrl + cur_city_id + "/?query=" + urllib.parse.quote(self.JobKeyword) + ("&page=%d&ka=page-%d" % (self.currentPage, self.currentPage)),
             headers=self.headers,
             callback=self.parse)
 
