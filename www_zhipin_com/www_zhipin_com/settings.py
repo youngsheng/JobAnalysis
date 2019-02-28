@@ -12,12 +12,12 @@
 # 中文编码
 FEED_EXPORT_ENCODING = 'utf-8'
 # 这么慢还是被限制...
-#CONCURRENT_REQUESTS = 1
-#DOWNLOAD_DELAY = 5
+CONCURRENT_REQUESTS = 1
+DOWNLOAD_DELAY = 5
 
-AUTOTHROTTLE_ENABLED = True
-AUTOTHROTTLE_START_DELAY = 0.2      # 初始下载延迟
-DOWNLOAD_DELAY = 0.2                # 每次请求间隔时间
+#AUTOTHROTTLE_ENABLED = True
+#AUTOTHROTTLE_START_DELAY = 0.2      # 初始下载延迟
+#DOWNLOAD_DELAY = 0.2                # 每次请求间隔时间
 
 MONGODB_HOST = '127.0.0.1'   
 MONGODB_PORT = 27017
@@ -25,7 +25,7 @@ MONGODB_DBNAME = 'Jobs'             #数据库名
 MONGODB_DOCNAME = 'ZhipinPython'          #表名
 
 LOG_FILE = './log.log'
-LOG_LEVEL = 'INFO'
+LOG_LEVEL = 'ERROR'
 
 BOT_NAME = 'www_zhipin_com'
 

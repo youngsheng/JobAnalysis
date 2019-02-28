@@ -30,11 +30,11 @@ class ZhipinSpider(scrapy.Spider):
     # positionUrl = 'https://www.zhipin.com/c101050100/?query=python'
     positionUrl = 'https://www.zhipin.com/'
     # 当前省份的下标
-    currentProv = 25
+    currentProv = 0
     # 当前页码
-    currentPage = 5
+    currentPage = 0
     # 当前城市的下标
-    currentCity = 5 #101270600
+    currentCity = 0 #101270600
 
     cityListUrl = "https://www.zhipin.com/common/data/city.json"
 
