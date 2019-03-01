@@ -6,6 +6,9 @@ import datetime
 from bson import binary
 import random
 
+import threading
+import json
+
 headers = {
     #'x-devtools-emulate-network-conditions-client-id': "5f2fc4da-c727-43c0-aad4-37fce8e3ff39",
     'upgrade-insecure-requests': "1",
@@ -20,13 +23,18 @@ headers = {
 }
 
 
-# 代理服务器
-proxyHost = "http-dyn.abuyun.com"
-proxyPort = "9020"
+f = open('./personal.json', encoding='UTF-8')
+setting = json.load(f)
+f.close()
 
+thread_num = setting['thread_num']
+
+# 代理服务器
+proxyHost = setting['proxyHost']
+proxyPort = setting['proxyPort']
 # 代理隧道验证信息
-proxyUser = "8769OA3P"
-proxyPass = "B097"
+proxyUser = setting['proxyUser']
+proxyPass = setting['proxyPass']
 
 proxyMeta = "http://%(user)s:%(pass)s@%(host)s:%(port)s" % {
     "host" : proxyHost,
@@ -40,26 +48,49 @@ proxies = {
     "https" : proxyMeta,
 }
 
-conn = MongoClient('127.0.0.1', 27017)
-db = conn.Jobs  # 连接mydb数据库，没有则自动创建
+collection_name = setting['collection_name']
+host = setting['MONGODB_HOST']
+port = setting['MONGODB_PORT']
+dbName = setting['MONGODB_DBNAME']
+
+conn = MongoClient(host, port)
+db = conn[dbName]  # 连接mydb数据库，没有则自动创建
+#items = db[collection_name].find({}, {'pid':1, 'detail':1}).sort('pid')
+itemsss = db[collection_name].find({"detail": {"$exists":False}}, {'pid':1}).sort('pid')
+items = list(itemsss)
+drop_items = []
+
+lock = threading.Lock()
 
 
 def init():
-    items = db.Zhipin.find().sort('pid')
-    for item in items:
+    while True:
+        try:
+            if(lock.acquire()):
+                item = items.pop()
+            lock.release()
+        except Exception as e:
+            print('My Error:',e)
+            lock.release()#死锁！！！
+            break
+        '''
         if 'detail' in item.keys():  # 在爬虫挂掉再此爬取时，跳过已爬取的行
             continue
+        '''
         detail_url = "https://www.zhipin.com/job_detail/%s.html?ka=search_list_1" % item['pid']
         print(detail_url)
         #result = requests.Session()
         #html = result.get(detail_url, headers=headers)
         try:
             html = requests.get(detail_url, headers=headers, proxies=proxies)
+            #html = requests.get(detail_url, headers=headers)
         except Exception as e:
             if repr(e).find('402') != -1:
                 break
             else:
+                #drop_items.append(item)
                 print(e)
+                continue
         #else:
         #    print('other orrer')
 
@@ -73,11 +104,15 @@ def init():
         # 302验证码
         elif html.history:
             print('please input verify code to continue.')
-            break
+            #drop_items.append(item)
+            #break
+            continue
         elif html.status_code != 200:  # 爬的太快网站返回403，这时等待解封吧
             print('status_code is %d,please wait and slow down' %
-                  html.status_code)
+                html.status_code)
+            #drop_items.append(item)
             #break
+            continue
 
         soup = BeautifulSoup(html.text, "html.parser")
         job = soup.select(".job-sec .text")
@@ -94,16 +129,22 @@ def init():
         res = update(item)  # 保存数据
         print(res)
         #time.sleep(random.randint(50,90))  # 停停停
-        time.sleep(0.2)  # 停停停
+        time.sleep(10)  # 停停停
+    #End of for item...
+    '''
+    if(len(drop_items)):
+        items = drop_items[:]
+        drop_items = []
+    '''
 
 
 # 保存数据到 MongoDB 中
 def update(item):
-    return db.Zhipin.update_one({"_id": item['_id']}, {"$set": item})
+    return db[collection_name].update_one({"_id": item['_id']}, {"$set": item})
 
 
 def clear_time():
-    items = db.Zhipin.find({})
+    items = db[collection_name].find({})
     for item in items:
         # print(item['time'])
         if not item['time'].find('布于'):
@@ -121,7 +162,7 @@ def clear_time():
 
 
 def clear_salary():
-    items = db.Zhipin.find({})
+    items = db[collection_name].find({})
     for item in items:
         if type(item['salary']) == type({}):
             continue
@@ -145,7 +186,7 @@ def clear_salary():
 
 
 def update_work_year():
-    items = db.Zhipin.find({})
+    items = db[collection_name].find({})
     for item in items:
         if item['workYear'] == '应届毕业生':
             item['workYear'] = '应届生'
@@ -159,7 +200,7 @@ def update_work_year():
 
 # 设置招聘的水平，分两次执行
 def set_level():
-    items = db.Zhipin.find({})
+    items = db[collection_name].find({})
     for item in items:
         if item['workYear'] == '应届生':
             item['level'] = 1
@@ -178,9 +219,19 @@ def set_level():
         update(item)
     print('set level OK')
 
+threads = []
+for i in range(0, thread_num):
+    t = threading.Thread(target=init)
+    threads.append(t)
+for i in range(0, thread_num):
+    threads[i].start()
+for i in range(0, thread_num):
+    threads[i].join()
 
 init()
 set_level()
 update_work_year()
 clear_salary()
 clear_time()
+
+#conn.close()

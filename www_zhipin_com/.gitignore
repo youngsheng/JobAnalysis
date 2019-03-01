@@ -1,3 +1,5 @@
 *.ipynb
 *.log
 *.pyc
+settings.json
+personal.json
