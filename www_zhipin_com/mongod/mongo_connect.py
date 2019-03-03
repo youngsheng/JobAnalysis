@@ -48,7 +48,7 @@ proxies = {
     "https" : proxyMeta,
 }
 
-collection_name = setting['collection_name']
+collection_name = setting['MONGODB_DOCNAME']
 host = setting['MONGODB_HOST']
 port = setting['MONGODB_PORT']
 dbName = setting['MONGODB_DBNAME']
@@ -56,14 +56,15 @@ dbName = setting['MONGODB_DBNAME']
 conn = MongoClient(host, port)
 db = conn[dbName]  # 连接mydb数据库，没有则自动创建
 #items = db[collection_name].find({}, {'pid':1, 'detail':1}).sort('pid')
-itemsss = db[collection_name].find({"detail": {"$exists":False}}, {'pid':1}).sort('pid')
-items = list(itemsss)
-drop_items = []
+#itemsss = db[collection_name].find({"detail": {"$exists":False}}, {'pid':1}).sort('pid')
+#items = list(itemsss)
+#drop_items = []
 
 lock = threading.Lock()
 
 
 def init():
+    #global items
     while True:
         try:
             if(lock.acquire()):
@@ -129,7 +130,7 @@ def init():
         res = update(item)  # 保存数据
         print(res)
         #time.sleep(random.randint(50,90))  # 停停停
-        time.sleep(10)  # 停停停
+        time.sleep(1)  # 停停停
     #End of for item...
     '''
     if(len(drop_items)):
@@ -219,19 +220,26 @@ def set_level():
         update(item)
     print('set level OK')
 
-threads = []
-for i in range(0, thread_num):
-    t = threading.Thread(target=init)
-    threads.append(t)
-for i in range(0, thread_num):
-    threads[i].start()
-for i in range(0, thread_num):
-    threads[i].join()
+for j in range(0,3):
 
-init()
+    itemsss = db[collection_name].find({"detail": {"$exists":False}}, {'pid':1}).sort('pid')
+    items = list(itemsss)
+
+    threads = []
+    for i in range(0, thread_num):
+        t = threading.Thread(target=init)
+        threads.append(t)
+    for i in range(0, thread_num):
+        threads[i].start()
+    for i in range(0, thread_num):
+        threads[i].join()
+    print('第%d次循环'%j)
+    time.sleep(10)
+
+#init()
 set_level()
 update_work_year()
 clear_salary()
 clear_time()
 
-#conn.close()
+conn.close()
