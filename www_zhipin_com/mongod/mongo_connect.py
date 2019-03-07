@@ -53,7 +53,7 @@ host = setting['MONGODB_HOST']
 port = setting['MONGODB_PORT']
 dbName = setting['MONGODB_DBNAME']
 
-conn = MongoClient(host, port)
+conn = MongoClient('mongodb://rwuser:XXXXXXXXXXX@192.168.0.229:8635/test?authSource=admin&replicaSet=replica')
 db = conn[dbName]  # 连接mydb数据库，没有则自动创建
 #items = db[collection_name].find({}, {'pid':1, 'detail':1}).sort('pid')
 #itemsss = db[collection_name].find({"detail": {"$exists":False}}, {'pid':1}).sort('pid')

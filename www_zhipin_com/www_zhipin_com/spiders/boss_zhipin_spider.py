@@ -39,6 +39,7 @@ class ZhipinSpider(scrapy.Spider):
     cityListUrl = "https://www.zhipin.com/common/data/city.json"
 
     cityList = []
+    positionList = []
 
     headers = {
         #'x-devtools-emulate-network-conditions-client-id': "5f2fc4da-c727-43c0-aad4-37fce8e3ff39",
@@ -52,6 +53,9 @@ class ZhipinSpider(scrapy.Spider):
         'cache-control': "no-cache",
         #'postman-token': "76554687-c4df-0c17-7cc0-5bf3845c9831"
     }
+
+    position_num = 0
+    city_num = 0
 
     def parse(self, response):
 
@@ -111,41 +115,50 @@ class ZhipinSpider(scrapy.Spider):
         if len(is_end) != 0 or len(is_one_page) == 0:
             # self.crawler.engine.close_spider(self, 'done!' % response.text)
             #     todo: 城市id变化，是否变化传入next_request的参数中，预先导入城市列表，然后循环
-            self.currentCity += 1
-            self.currentPage = 0
-            prov_index = self.currentProv
-            # 跨省
-            # print(len(self.cityList[prov_index]['subLevelModelList']))
-            if self.currentCity >= len(self.cityList[prov_index]['subLevelModelList']):
-                self.currentProv += 1
-                self.currentCity = 0
-                self.currentPage = 0
+            position_num = position_num + 1
+            
+            if position_num == len(self.positionList):
+                position_num = 0
+                self.city_num += 1
 
-        if self.currentProv == 34:
-            #self.send_email('爬取成功', 'success,正常退出!')
-            print('爬取成功', 'success,正常退出!')
-            self.crawler.engine.close_spider(self, 'done!')
+            self.currentPage = 0
+
+            if self.city_num == len(self.cityList):
+                self.crawler.engine.close_spider(self, 'done!')
+
         # 翻页
         self.currentPage += 1
+
+        url = self.generate_url(self.cityList[self.city_num][0], self.positionList[self.position_num][1], self.currentPage)
+
+
         time.sleep(random.randint(60,90))
-        yield self.next_request(self.currentProv, self.currentCity)
+        yield scrapy.http.FormRequest(url, headers=self.headers, callback=self.parse)
+
+
+
+
 
     def start_requests(self):
         # start_requests 只调用一次,初始化时获取city列表
-        res = requests.get(self.cityListUrl, headers=self.headers).content
-        city = json.loads(res.decode('utf-8'))
-
+        #res = requests.get(self.cityListUrl, headers=self.headers).content
+        #city = json.loads(res.decode('utf-8'))
+        with open('index.txt','r') as f:
+            self.city_num = int(f.readline().strip())
+            self.position_num = int(f.readline.strip())
+            self.currentPage = int(f.readline.strip())
+        self.cityList = self.get_city()
+        self.positionList = self.get_position('技术')
         # 调试用
-        self.cityList = city['data']['cityList']
+        #self.cityList = city['data']['cityList']
+        url = self.generate_url(self.cityList[self.city_num][0], self.positionList[self.position_num][1], self.currentPage)
 
-        return [self.next_request(self.currentProv, self.currentCity)]
+        return scrapy.http.FormRequest(url, headers=self.headers, callback=self.parse)
 
     def next_request(self, current_prov, current_city):
         logging.debug("current_prov"+str(current_prov))
         logging.debug("current_city"+str(current_city))
-        cur_city_id = 'c' + \
-            str(self.cityList[current_prov]
-                ['subLevelModelList'][current_city]['code'])
+        cur_city_id = 'c' + str(self.cityList[current_prov]['subLevelModelList'][current_city]['code'])
         logging.debug(cur_city_id)
         # 这里url写想要查找什么职业
         return scrapy.http.FormRequest(
@@ -164,3 +177,44 @@ class ZhipinSpider(scrapy.Spider):
         )
         mailer.send(to="xxxxxxxxx@qq.com", subject = subject, body = body)
 
+    def get_position(self, keyword):
+        res = requests.get(self.positionUrl, headers=self.headers).content
+        info = json.loads(res.decode('utf-8'))
+
+        pos_temp = []
+        #out_file = open(r'D:\Firefox Downloads\result.txt','w',encoding=r'utf-8')
+        #count = 0
+        for i in range(len(info['data'])):
+            data = info['data'][i]['subLevelModelList']
+            if(info['data'][i]['name'] == keyword):
+                for j in range(len(data)):
+                    list1 = data[j]['subLevelModelList']
+                    for x in range(len(list1)):
+                        #out_file.write(list1[x]['name']+'\n')
+                        #print(list1[x]['code'])
+                        #count = count + 1
+                        #yield list1[x]['code']
+                        pos_temp.append([list1[x]['code'], list1[x]['name']])
+        return pos_temp
+
+
+    def get_city(self):
+        res = requests.get(self.cityListUrl, headers=self.headers).content
+        info = json.loads(res.decode('utf-8'))
+        info = info['data']
+        pos_temp = []
+        #out_file = open(r'D:\Firefox Downloads\result.txt','w',encoding=r'utf-8')
+        #count = 0
+        for i in range(len(info['cityList'])):
+            data = info['cityList']
+            #if(info['data'][i]['name'] == keyword):
+            #for x in range(len(data)):
+            pos_temp.append([data[i]['code'], data[i]['name']])
+        return pos_temp
+
+    def generate_url(self, city_code, position_code, page):
+        with open('index.txt', 'w') as f:
+            f.write(str(self.city_num)+'\n')
+            f.write(str(self.position_num)+'\n')
+            f.write(str(self.currentPage)+'\n')
+        return 'https://www.zhipin.com/' + 'c{}'.format(city_code)+"/?query=" + urllib.parse.quote(position_code)+'&page={}&ka=page-{}'.format(page, page)
